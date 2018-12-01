@@ -34,6 +34,7 @@ public class AuthTokenSessionServiceImpl implements AuthTokenSessionService{
 	}
 
 	@Override
+	@Transactional
 	public void inValidate(String authToken) {
 		Optional<AuthTokenSession>  optional = authTokenSessionRepository.findById(authToken);
 		if(optional.isPresent()) {
@@ -44,6 +45,7 @@ public class AuthTokenSessionServiceImpl implements AuthTokenSessionService{
 	}
 
 	@Override
+	@Transactional
 	public AuthTokenSession startTokenSession(String authToken, int timeOutInSeconds) {
 		
 		AuthTokenSession authTokenSession = new AuthTokenSession();
