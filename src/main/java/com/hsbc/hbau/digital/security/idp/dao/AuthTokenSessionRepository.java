@@ -1,11 +1,11 @@
 package com.hsbc.hbau.digital.security.idp.dao;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import com.hsbc.hbau.digital.security.idp.domain.AuthTokenSession;
 
-@Repository("authTokenSessionRepository")
-public interface AuthTokenSessionRepository extends CrudRepository<AuthTokenSession, String>{
+@RepositoryRestResource(path = "authTokenSessions", collectionResourceRel = "authTokenSessions")
+public interface AuthTokenSessionRepository extends PagingAndSortingRepository<AuthTokenSession, String>{
 
 }
 	

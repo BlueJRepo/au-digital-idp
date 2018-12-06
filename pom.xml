@@ -16,11 +16,16 @@
 	</parent>
 		
     <properties>
-		<embedded-redis.version>0.6</embedded-redis.version>
+		<embedded-redis.version>0.7.1</embedded-redis.version>
     </properties>
 
 	<dependencies>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
@@ -30,18 +35,11 @@
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
-<!--			
-        <dependency>
-            <groupId>com.github.kstyrc</groupId>
-            <artifactId>embedded-redis</artifactId>
-            <version>${embedded-redis.version}</version>
-        </dependency>
--->
 
 		<dependency>
 		    <groupId>it.ozimov</groupId>
 		    <artifactId>embedded-redis</artifactId>
-		    <version>0.7.1</version>
+		    <version>${embedded-redis.version}</version>
 		</dependency>
         
         <dependency>
@@ -73,10 +71,23 @@
 
 	<build>
 		<plugins>
+		
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+						
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M1</version>
+				<configuration>
+					<excludes>
+						<exclude>com/hsbc/hbau/digital/security/idp/service/AuthTokenSessionServiceTest.java</exclude>
+					</excludes>
+				</configuration>
+		    </plugin>
+    			
 		</plugins>
 	</build>
 
