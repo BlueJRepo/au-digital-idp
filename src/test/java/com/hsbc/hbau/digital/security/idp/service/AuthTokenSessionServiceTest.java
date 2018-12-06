@@ -8,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.hsbc.hbau.digital.security.idp.ApplicationConfiguration;
@@ -19,7 +19,7 @@ import com.hsbc.hbau.digital.security.idp.domain.TokenStatus;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ApplicationConfiguration.class })
-@PropertySource("classpath:application-test.properties")
+@TestPropertySource("classpath:application-test.properties")
 public class AuthTokenSessionServiceTest {
 	
 	@Autowired
