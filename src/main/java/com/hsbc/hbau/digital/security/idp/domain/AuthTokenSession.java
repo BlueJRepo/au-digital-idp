@@ -2,7 +2,6 @@ package com.hsbc.hbau.digital.security.idp.domain;
 
 import java.io.Serializable;
 
-import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
@@ -10,6 +9,11 @@ import org.springframework.data.redis.core.TimeToLive;
 @RedisHash("authTokenSessions")
 public class AuthTokenSession implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6805872070146306193L;
+	
 	@Id
 	private String authToken;	
 	private long creationTimeStamp;

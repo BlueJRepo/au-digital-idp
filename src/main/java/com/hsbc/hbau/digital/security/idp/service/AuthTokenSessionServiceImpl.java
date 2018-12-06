@@ -20,6 +20,7 @@ public class AuthTokenSessionServiceImpl implements AuthTokenSessionService{
 	@Override
 	@Transactional
 	public TokenStatus isValid(String authToken) {
+		TokenStatus result = null;
 		Optional<AuthTokenSession>  optional = authTokenSessionRepository.findById(authToken);
 		if(optional.isPresent()) {
 			AuthTokenSession authTokenSession = optional.get();
@@ -28,14 +29,14 @@ public class AuthTokenSessionServiceImpl implements AuthTokenSessionService{
 				authTokenSession.setFirstEnquiryTimeStamp(now.getMillis());
 				authTokenSessionRepository.save(authTokenSession);
 			}
-			authTokenSession.getTokenStatus();
+			result = authTokenSession.getTokenStatus();
 		}
-		return null;
+		return result;
 	}
 
 	@Override
 	@Transactional
-	public void inValidate(String authToken) {
+	public void invalidate(String authToken) {
 		Optional<AuthTokenSession>  optional = authTokenSessionRepository.findById(authToken);
 		if(optional.isPresent()) {
 			AuthTokenSession authTokenSession = optional.get();

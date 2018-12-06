@@ -5,11 +5,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import redis.embedded.RedisExecProvider;
 import redis.embedded.RedisServer;
+import redis.embedded.util.Architecture;
+import redis.embedded.util.OS;
 
 import java.io.IOException;
 
@@ -19,6 +23,12 @@ public class RedisServerConfiguration implements DisposableBean, EnvironmentAwar
     private Log log = LogFactory.getLog(this.getClass());
     private RedisServer redisServer;
     private Environment environment;
+    
+    @Value("${unix.redis.path}")
+    private String unixRedisPath;
+
+    @Value("${x86.redis.path}")
+    private String x86RedisPath;
     
     public int getPort() {
         int v = environment.getProperty("spring.redis.port",Integer.class,0);
@@ -48,7 +58,12 @@ public class RedisServerConfiguration implements DisposableBean, EnvironmentAwar
 
         try {
             int port = getPort();
-            redisServer = new RedisServer(port);
+            RedisExecProvider customProvider = RedisExecProvider.defaultProvider()
+            		  .override(OS.UNIX, unixRedisPath)
+            		  .override(OS.WINDOWS, Architecture.x86, x86RedisPath)
+            		  .override(OS.WINDOWS, Architecture.x86_64, x86RedisPath);
+            
+            RedisServer redisServer = new RedisServer(customProvider, port);		  
             redisServer.start();
 
             if(log.isInfoEnabled()) {

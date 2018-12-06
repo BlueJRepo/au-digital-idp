@@ -6,7 +6,7 @@ import com.hsbc.hbau.digital.security.idp.domain.TokenStatus;
 public interface AuthTokenSessionService {
 	
 	TokenStatus isValid(String authToken);
-	void inValidate(String authToken);
+	void invalidate(String authToken);
 	AuthTokenSession startTokenSession(String authToken, int timeOutInSeconds);
 	
 }

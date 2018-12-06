@@ -4,11 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
 
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -19,6 +19,7 @@ import com.hsbc.hbau.digital.security.idp.domain.TokenStatus;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ApplicationConfiguration.class })
+@PropertySource("classpath:application-test.properties")
 public class AuthTokenSessionServiceTest {
 	
 	@Autowired
@@ -48,7 +49,7 @@ public class AuthTokenSessionServiceTest {
 	
 	@Test
 	public void test_authToken_time_to_live() throws InterruptedException {
-		AuthTokenSession authTokenSession = authTokenSessionService.startTokenSession(authToken, DEFAULT_TIME_TO_LIVE);
+		authTokenSessionService.startTokenSession(authToken, DEFAULT_TIME_TO_LIVE);
 		Optional<AuthTokenSession> option = authTokenSessionRepository.findById(authToken);
 		assertTrue(option.isPresent());
 		
@@ -61,8 +62,8 @@ public class AuthTokenSessionServiceTest {
 	
 	@Test
 	public void test_invalidate_authToken() {
-		AuthTokenSession authTokenSession = authTokenSessionService.startTokenSession(authToken, DEFAULT_TIME_TO_LIVE);
-		authTokenSessionService.inValidate(authToken);
+		authTokenSessionService.startTokenSession(authToken, DEFAULT_TIME_TO_LIVE);
+		authTokenSessionService.invalidate(authToken);
 		
 		Optional<AuthTokenSession> option = authTokenSessionRepository.findById(authToken);
 		AuthTokenSession authTokenSessionFound = option.get();
@@ -72,7 +73,7 @@ public class AuthTokenSessionServiceTest {
 	
 	@Test
 	public void test_isValid_authToken() {
-		AuthTokenSession authTokenSession = authTokenSessionService.startTokenSession(authToken, DEFAULT_TIME_TO_LIVE);
+		authTokenSessionService.startTokenSession(authToken, DEFAULT_TIME_TO_LIVE);
 		Optional<AuthTokenSession> option = authTokenSessionRepository.findById(authToken);
 		AuthTokenSession authTokenSessionFound = option.get();
 		assertTrue(authTokenSessionFound.getFirstEnquiryTimeStamp() == 0);

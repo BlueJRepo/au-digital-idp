@@ -6,7 +6,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 
 @Configuration
 @ComponentScan("com.hsbc.hbau.digital.security")
-@EnableRedisRepositories(basePackages= {"com.hsbc.hbau.digital.security.idp", "com.hsbc.hbau.digital.security.idp.dao", "com.hsbc.hbau.digital.security.idp.service"})
+@EnableRedisRepositories(basePackages= {"com.hsbc.hbau.digital.security.idp", "com.hsbc.hbau.digital.security.idp.dao"})
 public class ApplicationConfiguration {
 
 }
