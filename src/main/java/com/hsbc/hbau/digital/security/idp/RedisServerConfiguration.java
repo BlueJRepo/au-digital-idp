@@ -5,17 +5,25 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import redis.embedded.RedisExecProvider;
 import redis.embedded.RedisServer;
-import redis.embedded.util.Architecture;
-import redis.embedded.util.OS;
+import redis.embedded.RedisExecProvider;
 
+import redis.embedded.util.OS;
+import redis.embedded.util.OsArchitecture;
+
+import java.io.File;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 @Component
 public class RedisServerConfiguration implements DisposableBean, EnvironmentAware, InitializingBean {
@@ -23,12 +31,6 @@ public class RedisServerConfiguration implements DisposableBean, EnvironmentAwar
     private Log log = LogFactory.getLog(this.getClass());
     private RedisServer redisServer;
     private Environment environment;
-    
-    @Value("${unix.redis.path}")
-    private String unixRedisPath;
-
-    @Value("${x86.redis.path}")
-    private String x86RedisPath;
     
     public int getPort() {
         int v = environment.getProperty("spring.redis.port",Integer.class,0);
@@ -58,13 +60,38 @@ public class RedisServerConfiguration implements DisposableBean, EnvironmentAwar
 
         try {
             int port = getPort();
-            RedisExecProvider customProvider = RedisExecProvider.defaultProvider()
-            		  .override(OS.UNIX, unixRedisPath)
-            		  .override(OS.WINDOWS, Architecture.x86, x86RedisPath)
-            		  .override(OS.WINDOWS, Architecture.x86_64, x86RedisPath);
+	    boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+	    String redisUnixPath = environment.getProperty("redis.unix.path",String.class, "home/vcap/app/BOOT-INF/classes");
+	   
+	    if (!isWindows) {
+		ProcessBuilder builder = new ProcessBuilder();
+		//EXTRACT redis-5.0.2.tar.gz
+		builder.command("sh", "-c", "tar -xvf redis-5.0.2.tar.gz");
+                builder.directory(new File(redisUnixPath));
+	    	Process process = builder.start();
+	    	StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), System.out::println);
+            	Executors.newSingleThreadExecutor().submit(streamGobbler);
+            	int exitCode = process.waitFor();
+		
+		//BUILD RUNNING INSTANCE
+		assert exitCode == 0;
+		builder = new ProcessBuilder();
+		builder.command("sh", "-c", "make");
+		builder.directory(new File(redisUnixPath.concat("/redis-5.0.2")));
+                process = builder.start();
+		streamGobbler = new StreamGobbler(process.getInputStream(), System.out::println);
+            	Executors.newSingleThreadExecutor().submit(streamGobbler);
+            	exitCode = process.waitFor();
+		assert exitCode == 0;		
+	    }	
+
+	    RedisExecProvider customProvider = 	RedisExecProvider.defaultProvider()
+		.override(OS.UNIX, redisUnixPath.concat("/redis-5.0.2").concat("/src/redis-server"));            
             
-            RedisServer redisServer = new RedisServer(customProvider, port);		  
+	    redisServer = new RedisServer(customProvider, port);
             redisServer.start();
+	    
+  	    System.out.println("Starting local embedded redis server successfully, port is " + port);
 
             if(log.isInfoEnabled()) {
                 log.info("Starting local embedded redis server successfully, port is " + port);
@@ -78,5 +105,21 @@ public class RedisServerConfiguration implements DisposableBean, EnvironmentAwar
     public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
+
+private static class StreamGobbler implements Runnable {
+    private InputStream inputStream;
+    private Consumer<String> consumer;
+ 
+    public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
+        this.inputStream = inputStream;
+        this.consumer = consumer;
+    }
+ 
+    @Override
+    public void run() {
+        new BufferedReader(new InputStreamReader(inputStream)).lines()
+          .forEach(consumer);
+    }
+}
     
 }
